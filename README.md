@@ -4,15 +4,15 @@
 
 A lightweight Go-based overlay protocol that turns any existing IP network into a proactive self-healing mesh infrastructure.
 
-![PSHMP Core](https://github.com/AleksSefirot/PSHMP-Core/blob/main/preview.png)
+![Preview](preview.png)
 
 ## Key Features
 
-- **Average route recovery time**: 380 milliseconds
+- **Average route recovery**: 380 milliseconds
 - **Up to 75% reduction** in ACK/service traffic
-- Works as a **transparent overlay** — no hardware or network replacement required
+- Transparent overlay — no hardware replacement required
 - Strong performance under high packet loss and node churn
-- Built-in security (HMAC integrity, Rate Limiting, DDoS Protection)
+- Built-in security (HMAC, Rate Limiting, DDoS Protection)
 - WebRTC DataChannel + TURN support
 
 ## Use Cases
@@ -26,19 +26,23 @@ A lightweight Go-based overlay protocol that turns any existing IP network into 
 ## Quick Start (Demo)
 
 ```bash
-# Clone the repository
+# 1. Clone
 git clone https://github.com/AleksSefirot/PSHMP-Core.git
-
-# Go to demo directory
 cd PSHMP-Core
 
-# Run demo mode
+# 2. Install dependencies
+go mod tidy
+
+# 3. Run demo
 go run cmd/emulator/main.go -mode=demo
+
+# Stress test
+go run cmd/emulator/main.go -mode=stress -nodes=150 -ticks=100
 Results
 
 Demo mode: 87.9% successful delivery
 Stress mode (25% packet loss + churn): 74.6% successful delivery
-Real hardware tests: 0% packet loss on 3 devices
+Real hardware tests: 0% packet loss
 
 Technical Stack
 
