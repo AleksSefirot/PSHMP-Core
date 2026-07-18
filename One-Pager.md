@@ -1,87 +1,136 @@
-# PSHMP Core v2.5
+# PSHMP Core
+## One-Pager
 
-**Proactive Self-Healing Mesh Protocol**  
-**Next-Generation Overlay Network Core**
-
-**Developer:** Alexander Kolomytsev, Individual Entrepreneur (Russia)  
-**Date:** May 2026
+### Resilient Networking Core for Next-Generation Distributed Infrastructure
 
 ---
 
-### Executive Summary
+## What is PSHMP Core?
 
-**PSHMP Core** is a lightweight Go-based overlay protocol that turns any existing IP network into a **self-healing, resilient mesh infrastructure**.
+PSHMP Core is a modular distributed networking engine designed to improve reliability, availability, and efficiency of data delivery in unstable or high-loss networks.
 
-It detects degradation in real time and **proactively restores routes in just 380 milliseconds** — without interrupting service or replacing hardware.
+Instead of relying on static routes or centralized traffic flows, PSHMP Core continuously evaluates network conditions, automatically rebuilds delivery paths, and distributes traffic across multiple adaptive routes.
 
-Ideal for unstable, high-churn, and high packet-loss environments.
-
----
-
-### Key Advantages
-
-- **380 ms** average healing time (5–10x faster than traditional routing)
-- Up to **75% reduction** in ACK/service traffic
-- Proactive Self-Healing with K-Factor failure prediction
-- Built-in DDoS protection and intelligent rate limiting
-- HMAC integrity + Unique Node ID
-- WebRTC DataChannel + TURN support
-- Seamless overlay — works on top of any existing infrastructure
+The result is a networking layer that remains operational even when parts of the network become degraded or unavailable.
 
 ---
 
-### Performance Results
+## Key Capabilities
 
-| Mode              | Nodes | Conditions                  | Delivery Success | Healing Time |
-|-------------------|-------|-----------------------------|------------------|--------------|
-| **Demo**          | 120   | Standard                    | **87.9%**        | 380 ms       |
-| **Stress**        | 150   | 25% packet loss + churn     | **74.6%**        | 380 ms       |
-| **Real Network**  | 3     | PC + Laptop + Smartphone    | **100%**         | 380 ms       |
+### Self-Healing Delivery
 
-> Over **10,400** self-healing events recorded in stress tests.
+Automatically detects degraded relay paths and rebuilds them before service quality is affected.
 
 ---
 
-### Best Use Cases
+### Adaptive Multipath Routing
 
-- 5G Telecom Infrastructure
-- CDN and Edge Computing
-- Smart City & Critical Infrastructure
-- Hybrid Satellite + Terrestrial Networks
-- Industrial IoT and Private Networks
-- High-resilience environments
+Traffic can be distributed across multiple independent paths to improve resilience and reduce delivery interruptions.
 
 ---
 
-### Technology Value
+### Intelligent Network Selection
 
-- 100% Russian development
-- Clean Go codebase (10,000+ lines)
-- Production-ready MVP with Docker support
-- 3 patent-pending mechanisms
-- Full documentation + SAST security report
+A continuous K-Factor engine evaluates latency, packet loss and node stability to select the best delivery routes.
 
 ---
 
-### Cooperation Options
+### Efficient Data Recovery
 
-- Pilot project
-- Technology licensing
-- Full source code transfer + exclusive rights
-- Strategic partnership
+Batch ACK + Gap List significantly reduces acknowledgement overhead while enabling rapid recovery of missing data.
 
 ---
 
-### Contact
+### Distributed Entry Architecture
 
-**Alexander Kolomytsev**  
-Individual Entrepreneur
-
-- Phone: **+7 (918) 399-89-36**
-- Email: **giro.pandemik@gmail.com**
-
-**Available for live demo and technical discussion.**
+Supports multiple independent entry points instead of a single ingress, improving scalability and fault tolerance.
 
 ---
 
-**PSHMP Core — Connectivity that heals faster than users notice the problem.**
+### Security Built-In
+
+Integrated protection includes:
+
+- TLS transport
+- HMAC validation
+- Proof-of-Work node verification
+- Rate limiting
+- Chain integrity verification
+
+---
+
+## Potential Applications
+
+PSHMP Core can be integrated into products including:
+
+- Telecommunications platforms
+- Enterprise networking
+- Distributed content delivery
+- Edge computing
+- Hybrid cloud infrastructure
+- Large-scale distributed systems
+- Real-time communication platforms
+
+---
+
+## Technology Highlights
+
+- Adaptive Routing
+- Self-Healing Chain Relay
+- Multipath Transport
+- Dynamic Protocol Selection
+- Distributed Coordination
+- Health Monitoring
+- Metrics Export
+- Docker Deployment
+- Cluster Support
+- Modular Go Architecture
+
+---
+
+## Why PSHMP Core?
+
+Traditional networking solutions often rely on fixed routing decisions and centralized traffic coordination.
+
+PSHMP Core introduces an adaptive networking layer capable of continuously responding to changing network conditions while maintaining high delivery reliability and operational stability.
+
+The architecture is designed to be embedded into existing products rather than replace them.
+
+---
+
+## Current Status
+
+**Pilot-Ready MVP**
+
+Current implementation includes:
+
+- Modular Go architecture
+- 14 core networking modules
+- Docker deployment
+- Cluster orchestration
+- Monitoring support
+- Commercial licensing model
+
+Designed for pilot deployments, technical evaluations and enterprise integration.
+
+---
+
+## Commercial Availability
+
+PSHMP Core is available for:
+
+- Commercial licensing
+- OEM integration
+- Strategic partnerships
+- Pilot deployments
+- Technology acquisition (IP transfer)
+
+---
+
+## Contact
+
+**Alexander Kolomytsev**
+
+Founder & Developer
+
+Email: giro.pandemik@gmail.com
