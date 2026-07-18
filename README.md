@@ -1,106 +1,75 @@
 # PSHMP Core
 
-> **Distributed Network Transport Engine**
->
-> A resilient networking engine for building distributed, self-healing and adaptive transport infrastructures.
+**Proactive Self-Healing Multipath Platform**
+
+A resilient distributed networking core for high-availability data delivery in unreliable and high-loss networks.
+
+PSHMP Core is a modular networking technology designed for organizations building next-generation communication platforms, edge infrastructure, distributed content delivery systems, and resilient transport networks.
 
 ---
 
 ## Overview
 
-PSHMP Core is a high-performance distributed networking engine designed to improve the reliability, scalability and efficiency of modern communication platforms.
+PSHMP Core combines adaptive routing, self-healing delivery chains, multipath transport, intelligent network probing, and distributed coordination into a single lightweight networking engine.
 
-The platform combines intelligent routing, adaptive transport selection, distributed relay chains and automated recovery mechanisms to maintain stable data delivery even under unstable network conditions.
+The platform is intended for integration into products requiring:
 
-PSHMP Core is designed as an embeddable networking layer for secure connectivity platforms, enterprise overlay networks, distributed relay infrastructures and next-generation communication systems.
+- Reliable data delivery
+- High availability
+- Low-latency transport
+- Dynamic route adaptation
+- Distributed network architectures
+- Edge computing environments
 
----
+Typical deployment scenarios include:
 
-# Key Capabilities
-
-- Self-Healing Relay Architecture
-- Adaptive Routing Engine
-- Distributed Data Plane
-- Intelligent Chain Relay
-- Dynamic Transport Selection
-- Multi-Protocol Connectivity
-- Batch ACK + Gap Recovery
-- Automatic Path Rebuilding
-- HMAC Verified Relay Chains
-- Proof-of-Work Node Validation
-- Built-in Rate Limiting
-- Raft-based Coordinator Cluster
-- Prometheus Metrics Export
-- Horizontal Scaling
-- Fault-Tolerant Delivery
+- Distributed content delivery
+- Enterprise networking
+- Telecommunications
+- Edge infrastructure
+- Hybrid cloud networking
+- Industrial IoT
+- Large-scale distributed systems
 
 ---
 
-# Architecture
+## Core Features
 
-```
-                   Control Plane
+### Proactive Self-Healing Chain Relay
 
-              +--------------------+
-              |    Coordinator     |
-              |    Raft Cluster    |
-              +--------------------+
-                     │
-                     │
-        ─────────────┼────────────────
-                     │
-             Distributed Data Plane
-
-     Node ─ Node ─ Node ─ Node ─ Node
-        │       │        │       │
-     Relay   Relay    Relay   Relay
-
-                     │
-
-          Adaptive Transport Layer
-
-      UDP • TCP • TLS • HTTPS
-```
+Automatically rebuilds degraded delivery chains before packet loss affects applications.
 
 ---
 
-# Core Components
+### Adaptive Multipath Transport
 
-## Distributed Control Plane
-
-Provides coordination, topology management, health monitoring and cluster synchronization using a Raft-based architecture.
+Traffic can dynamically utilize multiple independent delivery paths to improve reliability and resilience.
 
 ---
 
-## Distributed Data Plane
+### Intelligent K-Factor Routing
 
-Traffic is forwarded through dynamically selected relay nodes without relying on fixed forwarding paths.
-
----
-
-## Self-Healing Chain Relay
-
-Relay chains continuously monitor delivery quality and automatically rebuild themselves when degraded links are detected.
+Continuously evaluates network quality and automatically selects optimal relay chains.
 
 ---
 
-## Adaptive Routing
+### Batch ACK + Gap List
 
-Routes are selected according to multiple network metrics including:
+Reduces acknowledgement traffic while enabling efficient recovery of missing data blocks.
 
-- Latency
-- Packet Loss
-- Stability
-- Node Health
-- K-Factor
+Benefits include:
+
+- Lower protocol overhead
+- Reduced bandwidth consumption
+- Faster recovery
 
 ---
 
-## Dynamic Transport Selection
+### Dynamic Transport Layer
 
-Automatically switches between supported transport protocols depending on current network conditions.
+Supports automatic protocol selection depending on network conditions.
 
-Supported transports:
+Supported transports include:
 
 - UDP
 - TCP
@@ -109,204 +78,120 @@ Supported transports:
 
 ---
 
-## Batch ACK + Gap Recovery
+### Distributed Entry Architecture
 
-Efficient acknowledgment mechanism that reduces control traffic while allowing selective recovery of missing packets.
-
-Benefits include:
-
-- Reduced protocol overhead
-- Lower bandwidth consumption
-- Faster recovery
-- Improved scalability
+Supports multiple independent entry points instead of relying on a single ingress node, improving resilience and load distribution.
 
 ---
 
-## Distributed Entry Layer
-
-Supports multiple dynamically managed ingress points, eliminating dependency on a single fixed entry node.
-
----
-
-## Security
+### Built-in Security
 
 PSHMP Core includes multiple security mechanisms:
 
-- TLS Transport
-- HMAC Message Authentication
-- Proof-of-Work Node Validation
-- Rate Limiting
-- Chain Verification
-- Secure Update Validation
-- SHA-256 Integrity Checking
+- TLS transport
+- HMAC verification
+- Proof-of-Work node validation
+- Rate limiting
+- Update integrity verification
+- Chain validation
 
 ---
 
-# Scalability
+### Observability
 
-The networking engine is designed for horizontal scaling.
+Native metrics are available for integration with:
 
-Current validation includes:
-
-- 5,000+ simulated nodes
-- Dynamic node churn
-- Automatic topology rebuilding
-- Distributed coordination
-- Adaptive relay selection
+- Prometheus
+- Grafana
+- External monitoring systems
 
 ---
 
-# Monitoring
+## Technical Highlights
 
-Built-in metrics include:
+Current implementation includes:
 
-- Active Nodes
-- Total Nodes
-- Packet Delivery
-- Packet Loss
-- Healing Events
-- Churn Events
-- Delivery Success Rate
-- K-Factor
-- Network Health
-
-Prometheus integration is supported.
+- Self-Healing delivery engine
+- Distributed coordinator
+- Adaptive routing
+- Multipath transport
+- Dynamic protocol switching
+- Batch acknowledgements
+- Distributed node management
+- DHT support
+- Licensing module
+- Health monitoring
+- Metrics export
+- Docker deployment
+- Cluster orchestration
 
 ---
 
-# Deployment
+## Architecture
 
-PSHMP Core supports multiple deployment models.
+PSHMP Core follows a modular architecture.
 
-- Local Development
+```
+Applications
+        │
+        ▼
+PSHMP Core
+        │
+ ┌───────────────┐
+ │ Coordinator   │
+ │ Routing       │
+ │ Self-Healing  │
+ │ K-Factor      │
+ │ Multipath     │
+ └───────────────┘
+        │
+ Distributed Nodes
+        │
+ Network Transport
+```
+
+---
+
+## Deployment
+
+Supported environments:
+
+- Linux
+- Windows
+- macOS
 - Docker
 - Docker Compose
-- Enterprise Infrastructure
-- Hybrid Cloud
-- Bare Metal
+- Cloud infrastructure
+- Bare metal
 
 ---
 
-# Potential Integration Areas
-
-PSHMP Core is designed to serve as a networking engine for a wide range of communication platforms, including:
-
-- Secure Connectivity Platforms
-- Enterprise Overlay Networks
-- Distributed VPN Infrastructure
-- Software Defined WAN
-- Edge Computing Platforms
-- Content Delivery Infrastructure
-- Telecom Services
-- Hybrid Cloud Networking
-- Secure Mesh Networks
-- Distributed Gateway Platforms
-
----
-
-# Technology Highlights
-
-- Distributed relay architecture
-- Adaptive routing
-- Self-healing networking
-- Dynamic transport layer
-- Packet loss recovery
-- Fault tolerance
-- Multi-path communication
-- Intelligent node selection
-- High availability
-- Horizontal scalability
-
----
-
-# Current Status
-
-Current development includes:
-
-- Distributed networking engine
-- Adaptive relay architecture
-- Dynamic protocol selection
-- Security framework
-- Monitoring subsystem
-- Deployment infrastructure
-- Commercial licensing support
-
-The platform is intended for pilot deployments and technology evaluation.
-
----
-
-# Repository Structure
-
-```
-cmd/
-    coordinator/
-    node/
-    emulator/
-
-pkg/
-    ack/
-    chain/
-    coordinator/
-    licensing/
-    metrics/
-    node/
-    persistence/
-    probing/
-    ratelimit/
-    security/
-    transport/
-
-scripts/
-
-configs/
-
-docs/
-```
-
----
-
-# Documentation
-
-Documentation includes:
-
-- Architecture
-- Deployment Guide
-- Testing Guide
-- API Reference
-- Configuration
-- Licensing
-
----
-
-Commercial Availability
+## Commercial Availability
 
 PSHMP Core is available for:
 
-Commercial licensing
-OEM integration
-Strategic partnerships
-Technology acquisition (IP transfer)
-Pilot deployments
+- Commercial licensing
+- OEM integration
+- Strategic partnerships
+- Pilot deployments
+- Technology acquisition (IP transfer)
 
-For business inquiries, licensing terms, or acquisition discussions, please contact:
-
-Alexander Kolomytsev
-giro.pandemik@gmail.com
+Organizations interested in evaluating, integrating, licensing, or acquiring the technology are welcome to contact the author.
 
 ---
 
-# Contact
+## Contact
 
 **Alexander Kolomytsev**
 
-Email:
-giro.pandemik@gmail.com
-
-GitHub:
-https://github.com/AleksSefirot
+Email: giro.pandemik@gmail.com
 
 ---
 
-**PSHMP Core**
+## License
 
-*Distributed Networking Engine for Resilient Communication Platforms.*
+Copyright © Alexander Kolomytsev.
+
+All rights reserved.
+
+Source code is provided for evaluation purposes only unless otherwise agreed under a commercial license.
