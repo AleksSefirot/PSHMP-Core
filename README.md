@@ -278,11 +278,20 @@ Documentation includes:
 
 ---
 
-# License
+Commercial Availability
 
-Commercial License
+PSHMP Core is available for:
 
-For licensing, evaluation or partnership inquiries please contact the author.
+Commercial licensing
+OEM integration
+Strategic partnerships
+Technology acquisition (IP transfer)
+Pilot deployments
+
+For business inquiries, licensing terms, or acquisition discussions, please contact:
+
+Alexander Kolomytsev
+giro.pandemik@gmail.com
 
 ---
 
