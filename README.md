@@ -1,4 +1,5 @@
-# PSHMP Core
+PSHMP Core — Proactive Self-Healing Mesh Protocol
+Decentralized overlay network with self-healing, K-Factor, and 380ms recovery
 
 **Proactive Self-Healing Multipath Platform**
 
