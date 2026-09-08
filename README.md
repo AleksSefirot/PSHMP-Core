@@ -1,3 +1,5 @@
+<img width="1168" height="784" alt="eXVXX" src="https://github.com/user-attachments/assets/cc26f17e-fdd0-40d4-bcc9-6cf7fb14c5d8" />
+
 # PSHMP Core v3.1
 
 **Proactive Self-Healing Mesh Protocol**
