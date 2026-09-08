@@ -1,0 +1,367 @@
+# PSHMP Core v3.1
+
+## Sale Package Overview
+
+**Proactive Self-Healing Mesh Protocol**
+
+Hybrid L4 Overlay for Decentralized Data Delivery and Proactive Self-Healing
+
+**Version:** 3.1  
+**Status:** Pilot-Ready Technology Foundation  
+**Date:** September 2026  
+**Developer:** Alexander Kolomytsev  
+**Transaction Type:** Technology Acquisition / Full Transfer of Ownership
+
+---
+
+## 1. Executive Summary
+
+PSHMP Core is a networking technology designed for resilient multi-hop data delivery in distributed systems.
+
+It operates as an **L4-oriented overlay** on top of existing IP infrastructure. It does not require changes to Layer 3 routing or replacement of network hardware. The core provides dynamic multi-hop delivery chains, continuous assessment of node and path conditions, and proactive route recovery when quality degrades.
+
+Instead of relying on a single static path or a purely reactive failover, PSHMP Core combines:
+
+- linear relay chains under stable conditions;
+- local mesh recovery when multiple nodes on a path degrade;
+- continuous K-Factor evaluation;
+- diversity-aware candidate selection;
+- distributed discovery (DHT + Gossip);
+- failure tracking and quarantine;
+- batch acknowledgements with gap recovery.
+
+The technology is available as a functional **Pilot-Ready technology foundation** with a working Go implementation, technical documentation, testing infrastructure, and Individual Internet-Drafts published on the IETF Datatracker.
+
+PSHMP Core is offered for **acquisition** by a strategic technology company seeking to integrate these capabilities into an existing product, platform, or network infrastructure.
+
+---
+
+## 2. Technology Overview
+
+PSHMP Core provides an intelligent networking layer for distributed systems. The design is built around several principles:
+
+- decentralized data delivery;
+- dynamic multi-hop routing;
+- continuous network condition assessment;
+- proactive recovery before complete failure;
+- diversity-aware route construction;
+- distributed candidate discovery;
+- adaptive recovery under severe degradation;
+- operation over existing IP infrastructure.
+
+The architecture allows the networking layer to react to changing conditions without requiring the underlying IP infrastructure to be redesigned. PSHMP Core is therefore positioned as a **reusable technological foundation** rather than a standalone end-user application.
+
+---
+
+## 3. Core Technology
+
+### Hybrid Operating Model
+
+Under stable conditions the system prefers **linear relay chains** — ordered multi-hop paths that are simple and predictable. When several nodes on an active chain show clear degradation (typically three or more), the system can switch that chain into **local mesh recovery**: collect candidates, apply a progressive fallback ladder, enforce a quality gate, and replace only the affected path. The rest of the network remains untouched. Once conditions improve, operation can return to the linear style.
+
+### Dynamic Chain Relay
+
+PSHMP Core dynamically builds and rebuilds multi-hop delivery chains according to current network conditions. Traffic can be delivered through a sequence of relay nodes rather than relying exclusively on a direct path. When individual nodes or links degrade, the system constructs alternative delivery chains using currently available candidates.
+
+### K-Factor Evaluation
+
+Nodes are evaluated with a composite stability metric (K-Factor). The reference model used in the experimental implementation is:
+
+```text
+K = 0.45 × (1 − loss / 0.35)
+  + 0.25 × (1 − jitter / 800)
+  + 0.20 × (1 − rtt / 1200)
+  + 0.10 × battery
+```
+
+Terms are clamped to [0, 1]. The resulting score drives both relay selection and early degradation detection. Status bands (EXCELLENT → CRITICAL) and exact weights are configuration parameters and can be tuned by the integrating party.
+
+Candidate ranking uses an additional weighted score:
+
+```text
+Score = 0.50 × KScore + 0.25 × LatencyScore + 0.15 × LossScore + 0.10 × GeoScore
+```
+
+### Proactive Self-Healing
+
+The core is designed to detect network degradation and initiate route reconstruction before a complete failure occurs. Recovery is prioritised (CRITICAL / HIGH / MEDIUM / LOW) with adaptive cooldown so that the system does not thrash. Under simulated conditions the implementation has shown recovery behaviour on the order of hundreds of milliseconds. Actual recovery time depends on topology, load, and available candidates.
+
+### Local Mesh Recovery and Fallback Ladder
+
+When multiple nodes within the same relay chain become degraded, the affected chain can automatically transition into local mesh recovery. The process uses DHT and Gossip candidates, failure tracking, quarantine, diversity-aware selection, and a multi-level fallback ladder:
+
+```text
+Level 0: MinAvgK ≥ 0.70, diversity required
+Level 1: MinAvgK ≥ 0.65, diversity required
+Level 2: MinAvgK ≥ 0.60, diversity required
+Level 3: MinAvgK ≥ 0.52, diversity required
+Level 4: MinAvgK ≥ 0.42, diversity optional
+```
+
+A quality gate is applied before the new path replaces the old one. Mesh recovery operates locally on the affected chain rather than requiring the entire network to be rebuilt.
+
+### Diversity-Aware Recovery
+
+During recovery, candidates can be selected with preference for different logical failure domains (subnet, region, provider, availability zone, or deployment-defined groups). The objective is not simply to find another available node, but to construct a route with greater structural diversity — especially important when multiple nodes in the same domain degrade together.
+
+### Distributed Candidate Discovery
+
+DHT-based candidate selection is combined with Gossip-based state propagation (push and anti-entropy). This reduces dependence on a single source of network information and allows the system to continue operating when a central coordinator is unavailable. An optional Raft-based coordinator can be used when stronger consistency is required; it is not mandatory.
+
+### Failure Tracking and Quarantine
+
+The core maintains information about node failures and degraded behaviour. Repeatedly unstable nodes can be temporarily quarantined and excluded from new path construction. After a period of stable behaviour a node may be rehabilitated. This reduces recovery loops caused by the same unreliable participants.
+
+### Transport-Efficient Delivery
+
+Batch acknowledgements with an explicit gap list allow the receiver to report the highest contiguous sequence and the missing ranges. The sender retransmits only what is actually lost. Under the traffic patterns examined in internal tests this approach has reduced control-plane overhead substantially (in favourable cases approaching the order of 75%). Exact efficiency depends on loss rate, batch size, and configuration.
+
+### Overlay Deployment Model
+
+PSHMP Core operates as an overlay layer over existing IP infrastructure. The underlying L3 routing can remain unchanged. Supported transports include UDP, DTLS, TLS, and WebRTC DataChannels, with optional TURN assistance for NAT traversal.
+
+---
+
+## 4. Architecture Layers
+
+| Layer | Main components |
+|-------|-----------------|
+| **Control Plane** | Optional Coordinator, Raft, Sharding, K-Factor Engine, Self-Healing Engine, Mesh State Machine |
+| **Data Plane** | Chain Relay, PathFinder, Local Mesh Recovery, DataPath, Batch ACK + Gap List, Retransmit Cache |
+| **Decentralization** | Kademlia-style DHT, Gossip, Discovery facade, Membership |
+| **Security & Transport** | TLS/DTLS, HMAC, Rate Limiting, optional Proof-of-Work, transport abstraction |
+| **Infrastructure** | Persistence, Config, Prometheus metrics, structured logging |
+
+---
+
+## 5. Current Implementation
+
+PSHMP Core v3.1 is a functional implementation rather than a conceptual architecture only.
+
+Approximate scope of the current codebase:
+
+- **Go source code:** on the order of 15,000+ lines  
+- **Go source files:** 90+  
+
+Major areas include:
+
+- **pkg/chain/** — dynamic relay chains, PathFinder, Mesh Recovery, verifier  
+- **pkg/dht/** — candidate selection, Kademlia-style store, failure tracking  
+- **pkg/healing/** — Self-Healing Engine, mesh state machine  
+- **pkg/gossip/** — push dissemination and anti-entropy  
+- **pkg/delivery/** — DataPath, batch acknowledgements, retransmit cache  
+- **pkg/probing/** — K-Factor calculation and adaptive probing  
+- **pkg/coordinator/** — optional coordination, sharding, Raft support  
+- **pkg/node/** — node lifecycle and management  
+- Supporting modules: transport, security, metrics, persistence, config, emulation  
+
+The implementation also includes network emulation tools (demo, stress, extreme, realistic, live modes) and deployment-oriented materials (Docker / Compose).
+
+---
+
+## 6. Testing and Demonstrated Results
+
+Testing combines unit tests, network emulation, and limited real-network experiments.
+
+Previously demonstrated internal results include:
+
+| Aspect | Observation |
+|--------|-------------|
+| Emulated network size | Up to 5,000+ nodes |
+| Packet loss scenarios | Up to 25% (and higher in extreme modes) |
+| Delivery under tested scenarios | High success rates in emulation (including scenarios reported as 100% under specific test conditions) |
+| Recovery behaviour | On the order of hundreds of milliseconds in simulated conditions |
+| Control traffic | Substantial reduction with Batch ACK + Gap List (favourable cases approaching ~75%) |
+
+**These results represent internal development and testing conditions.** They must not be interpreted as universal production guarantees. Production performance depends on topology, hardware, traffic, and integration architecture. Physical validation is the responsibility of the acquiring party.
+
+---
+
+## 7. Development Status
+
+**Implemented (v3.1):**
+
+- Dynamic Chain Relay and PathFinder  
+- K-Factor node evaluation  
+- Proactive Self-Healing with priority scheduling  
+- DHT candidate selection  
+- Gossip-based network awareness  
+- Failure tracking and quarantine  
+- Diversity-aware recovery  
+- Local Mesh Recovery with multi-level fallback and quality gate  
+- Batch ACK + Gap List delivery path  
+- Optional Raft / sharding coordination  
+- WebRTC / TURN integration  
+- Prometheus metrics  
+- Docker / Docker Compose support  
+- Network emulation suite  
+
+The core is considered a **Pilot-Ready technology foundation**. Further work for production use would focus on integration, security hardening, deployment-specific adaptation, and validation within the acquiring company’s infrastructure.
+
+---
+
+## 8. Internet-Drafts
+
+Architecture and design principles are documented as Individual Internet-Drafts on the IETF Datatracker, including:
+
+- draft-kolomytsev-pshmp-core  
+- draft-kolomytsev-pshmp-overview  
+- draft-kolomytsev-pshmp-core-overview-00  
+
+Published materials are available at datatracker.ietf.org (search “kolomytsev pshmp”).
+
+---
+
+## 9. Potential Integration Areas
+
+PSHMP Core can serve as a technological foundation for companies developing:
+
+- distributed networking platforms;  
+- telecommunications and backhaul infrastructure;  
+- edge computing and multi-site systems;  
+- CDN and content delivery under variable path quality;  
+- VPN and secure overlay networks;  
+- IoT and large-scale device networks with unstable links;  
+- enterprise and industrial networking requiring adaptive recovery;  
+- real-time distributed systems where recovery time matters.  
+
+These are potential integration areas rather than limitations of the technology.
+
+---
+
+## 10. Value to a Strategic Buyer
+
+The primary value of PSHMP Core is not the line count of source code.
+
+The value lies in the combination of:
+
+- networking architecture (hybrid linear + mesh);  
+- implemented recovery and selection algorithms;  
+- K-Factor-driven decision model;  
+- distributed candidate discovery;  
+- failure-management and quarantine logic;  
+- Mesh Recovery with fallback ladder and quality gate;  
+- integration between multiple networking components;  
+- testing and emulation infrastructure;  
+- documentation and IETF drafts;  
+- accumulated engineering knowledge and prior design history.  
+
+Recreating a comparable system from scratch would require significant engineering resources, architectural experimentation, and validation. The existing implementation allows a strategic buyer to start from a working technological foundation rather than beginning the networking architecture from zero.
+
+---
+
+## 11. What Is Included in the Sale Package
+
+The technology package can include:
+
+**01 — Core Technology**  
+Complete PSHMP Core v3.1 source code.
+
+**02 — Architecture**  
+Architecture and design documentation describing major components and their relationships.
+
+**03 — Technical Documentation**  
+Technical documentation covering implemented mechanisms, formulas, and operating principles.
+
+**04 — Testing Materials**  
+Test scenarios, network emulation materials, and supporting evidence.
+
+**05 — Demonstration Materials**  
+Demonstration configurations, logs, and related materials.
+
+**06 — Deployment Materials**  
+Docker, Docker Compose, and related deployment configurations.
+
+**07 — Prior Work and IP History**  
+Prior versions, design drafts, and materials useful for understanding evolution of the technology.
+
+**08 — Intellectual Property**  
+Documentation and declarations required for transfer of the technology and associated rights.
+
+The exact scope of the final transaction package can be defined during due diligence.
+
+---
+
+## 12. Acquisition Opportunity
+
+PSHMP Core is available for acquisition by a strategic technology company.
+
+The preferred transaction structure is a **full transfer of ownership and exclusive rights** to the technology.
+
+The transaction may include:
+
+- intellectual property rights;  
+- complete source code;  
+- architecture and design materials;  
+- technical documentation;  
+- test and demonstration materials;  
+- deployment materials;  
+- associated technical assets and design history.  
+
+Following the transaction, the acquiring company would receive the rights necessary to independently modify, integrate, commercialize, and further develop PSHMP Core.
+
+The objective is not investment into an independent startup.  
+The objective is the **transfer of the technology to a strategic owner** capable of integrating and developing it at scale.
+
+---
+
+## 13. Why Acquisition Rather Than Internal Development
+
+Developing a comparable networking core internally would require more than implementing a set of individual features. The engineering challenge includes architecture design, interaction between distributed components, failure handling, route reconstruction, candidate selection, testing under degraded conditions, and iterative validation.
+
+The current implementation represents a substantial integrated body of work. The acquisition model allows a strategic buyer to obtain an existing technological foundation and focus internal resources on integration, productization, and deployment rather than rebuilding the underlying architecture from the beginning.
+
+---
+
+## 14. Current Technology Scope
+
+PSHMP Core should be viewed as a **networking technology asset** rather than a finished commercial product.
+
+The current MVP demonstrates the core architectural concepts and their implementation. A production deployment would require buyer-specific work including:
+
+- integration with existing infrastructure;  
+- production security review;  
+- performance optimization under real traffic;  
+- operational monitoring;  
+- deployment-specific testing;  
+- compatibility validation;  
+- productization.  
+
+This approach allows the acquiring company to adapt the technology to its own architecture and strategic requirements.
+
+---
+
+## 15. Transaction Structure
+
+**Preferred model:** Technology Acquisition  
+
+- **Ownership:** Full transfer  
+- **IP Rights:** Exclusive transfer  
+- **Source Code:** Included  
+- **Documentation:** Included  
+- **Technical Assets:** Included  
+- **Further Development:** Acquirer-controlled  
+- **Commercialization:** Acquirer-controlled  
+
+The transaction structure can be adapted to the legal and corporate requirements of the acquiring party.
+
+---
+
+## 16. Contact
+
+**Alexander Kolomytsev**  
+Developer and Architect of PSHMP Core  
+
+Email: giro.pandemik@gmail.com  
+Phone: +7 (918) 399-89-36  
+
+Repository: https://github.com/AleksSefirot/PSHMP-Core  
+IETF: datatracker.ietf.org (search “kolomytsev pshmp”)
+
+Available for technical demonstration, due diligence, and discussion of acquisition terms.
+
+---
+
+**PSHMP Core v3.1**  
+Decentralized Data Delivery. Adaptive Networking. Proactive Self-Healing.  
+A technology foundation for resilient distributed systems.
