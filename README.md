@@ -3,19 +3,28 @@
 
 # PSHMP Core
 
-**Proactive Self-Healing Mesh Protocol**
+**Hybrid L4-oriented overlay for multi-hop delivery under node and path degradation.**
 
-Hybrid L4 overlay network core for resilient multi-hop data delivery over existing IP infrastructure.
-
-PSHMP Core is a **technology foundation** designed for organizations building high-availability communication platforms, edge networks, distributed content delivery, telecommunications overlays, and resilient transport systems. It adds adaptive relay paths, proactive recovery, and efficient acknowledgements **without replacing Layer 3 routing or existing hardware**.
+Runs **over existing IP** — does not replace routers, OSPF, or BGP.  
+Technology foundation for evaluation, pilot integration, OEM embedding, or full technology transfer.
 
 ---
 
-## Why it exists
+## What it is
 
-Distributed systems rarely enjoy perfect connectivity. Packet loss, jitter, node failures, overloaded links, and partial outages appear in cloud, edge, industrial, and telecom environments. Traditional recovery is often reactive: the path fails first, then the system reacts. By that time applications already feel the impact.
+PSHMP Core is a **logical delivery layer** above ordinary IP reachability.
 
-PSHMP Core treats **progressive degradation** as a first-class signal. Nodes continuously evaluate stability. When quality falls, the system starts reconstructing the affected delivery path—often before the path is completely unusable. The result is an overlay that keeps traffic moving with less disruption and less dependence on any single central controller.
+Under stable conditions it builds **ordered relay chains** and forwards application fragments hop by hop while preserving fragment identity.
+
+When nodes on a path **degrade**, it can:
+
+- detect quality loss early (K-Factor + Load),
+- select alternative candidates (HybridDHT / gossip-assisted discovery),
+- **rebuild the affected path** (local recovery — not a full underlay repair),
+- retransmit **only missing fragments** (session Batch ACK + gap list).
+
+It does **not** require changing Layer-3 routing.  
+It does **not** restore a complete underlay partition (no IP path → no overlay path).
 
 ---
 
@@ -23,151 +32,118 @@ PSHMP Core treats **progressive degradation** as a first-class signal. Nodes con
 
 | Mode | When | Behaviour |
 |------|------|-----------|
-| **Linear chains** | Stable network | Ordered multi-hop relay paths. Simple, predictable, optionally coordinated. |
-| **Local mesh recovery** | Multiple nodes degrade (typically ≥3) | Collect candidates (DHT + Gossip), apply progressive fallback, quality gate, replace only the affected path. |
+| **Ordered chains** | Stable network | One active multi-hop relay path. Predictable forwarding. |
+| **Local mesh-style recovery** | Path / node degradation | Expand candidates, apply fallback and diversity rules, quality gate, replace the **affected** logical path. |
 
-This hybrid approach keeps the common case simple while providing a robust escape hatch when several relays fail together. The underlying IP network remains unchanged—only the logical overlay path is rebuilt.
-
----
-
-## Core capabilities
-
-### K-Factor — continuous stability metric
-Composite score from packet loss, jitter, RTT, and optional node-health indicators. Used both for **selecting relays** and for **early degradation detection**. Tunable weights and status bands (EXCELLENT → CRITICAL).
-
-### Proactive Self-Healing
-Priority-based recovery (CRITICAL / HIGH / MEDIUM / LOW) with adaptive cooldown. Reconstruction starts from degradation signals, not only from hard failures—shortening the window of visible service impact.
-
-### Local Mesh Recovery + Fallback Ladder
-Multi-level recovery that gradually relaxes quality and diversity requirements. Early levels demand high average K-Factor and failure-domain diversity; later levels prefer any working path over silence. A **quality gate** prevents installing a clearly worse path.
-
-### Diversity-aware selection
-Nodes can be grouped by logical failure domain (subnet, region, provider, AZ). During recovery the system prefers candidates from different groups to reduce correlated failures.
-
-### Batch ACK + Gap List
-Receivers report the highest contiguous sequence and explicit missing ranges instead of acknowledging every packet. Reduces control-plane overhead while enabling precise retransmission. Experimental observations under favourable traffic patterns show substantial savings (approaching the order of 75% in tested scenarios).
-
-### Decentralised discovery
-**Gossip** (push + anti-entropy) spreads node state and K-Factor updates. **Kademlia-style DHT** supplies candidates when a coordinator is unreachable. An optional Raft-based coordinator can provide stronger consistency when desired—it is not mandatory.
-
-### Transport abstraction
-UDP, DTLS, TLS, WebRTC DataChannels, and other bidirectional transports. TURN assistance where NAT traversal is required. Path logic stays independent of the concrete transport.
+Normal forwarding is **single-path** (one active chain).  
+Backup chains support **failover**, not parallel multipath send by default.  
+“Mesh” here means **candidate selection and path reconstruction**, not flooding every fragment on all links.
 
 ---
 
-## Architecture layers
+## Core building blocks
 
-| Layer | Main components |
-|-------|-----------------|
-| **Control Plane** | Optional Coordinator, Raft cluster, Sharding, K-Factor Engine, Self-Healing Engine, Mesh State Machine |
-| **Data Plane** | Chain Relay, PathFinder, Local Mesh Recovery, DataPath, Batch ACK + Gap List, Retransmit Cache |
-| **Decentralization** | DHT (Kademlia-style), Gossip, Discovery facade, Membership |
-| **Security & Transport** | TLS/DTLS, HMAC, Rate Limiting, optional Proof-of-Work, transport abstraction |
-| **Infrastructure** | Persistence, Config, Prometheus metrics, structured logging |
+| Block | Role |
+|-------|------|
+| **K-Factor** | Continuous node quality signal (loss, jitter, RTT, optional health). |
+| **Load (1–5)** | Utilization class in ranking (`effectiveK = K × loadFactor`; Load 5 excluded). |
+| **HybridDHT** | Production candidate source (Normal / Stress / Mesh modes). |
+| **ChainManager / ChainRelay** | Build and hold primary (+ backup) chains; first-hop forwarding. |
+| **Self-Healing** | Priority recovery when degradation is reported. |
+| **DataPath** | Chunking, session identity, Batch ACK, gap list, targeted retransmit, backpressure. |
+| **Gossip** | Peer state propagation. |
+| **Coordinator (optional)** | Registration / heartbeat; **not** required on every data packet. |
+| **Transport** | UDP / DTLS / TLS-TCP (config-dependent) via protocol switcher. |
 
 ---
 
-## Reference formulas (experimental model)
-
-**K-Factor**
+## Architecture (short)
 
 ```text
-K = 0.45 × (1 − loss/0.35)
-  + 0.25 × (1 − jitter/800)
-  + 0.20 × (1 − rtt/1200)
-  + 0.10 × battery
+Application / Service
+        ↓
+   PSHMP CORE          ← logical overlay (path + session delivery)
+        ↓
+ Transport carriers    ← UDP / DTLS / TLS-TCP
+        ↓
+      IP layer
+        ↓
+ Routers & underlay    ← OSPF / BGP / physical links (unchanged)
 ```
 
-Terms are clamped to [0, 1]. Weights and normalisation constants are tunable per deployment.
-
-**Candidate scoring**
-
-```text
-Score = 0.50 × KScore
-      + 0.25 × LatencyScore
-      + 0.15 × LossScore
-      + 0.10 × GeoScore
-```
-
-**Mesh recovery fallback ladder (reference)**
-
-```text
-Level 0: MinAvgK ≥ 0.70, diversity required
-Level 1: MinAvgK ≥ 0.65, diversity required
-Level 2: MinAvgK ≥ 0.60, diversity required
-Level 3: MinAvgK ≥ 0.52, diversity required
-Level 4: MinAvgK ≥ 0.42, diversity optional
-```
+**Control plane:** peer state, K/Load, candidate selection, chain rebuild.  
+**Data plane:** ordered relay of the same fragment identity, ACK/gaps, retransmit.
 
 ---
 
-## Experimental validation
+## What this is not
 
-The Go implementation (v3.1) has been exercised primarily through **large-scale network emulation** (up to 5 000+ nodes) and limited real-network experiments. Under the tested scenarios the system demonstrated:
+- Not a replacement for IP routing or a new global internet fabric  
+- Not simultaneous multipath by default  
+- Not a full PKI / complete production security product out of the box  
+- Not a guaranteed SLA from lab numbers alone  
+- Not “heal the cable” when underlay is fully partitioned  
 
-- recovery behaviour on the order of hundreds of milliseconds
-- continued delivery under elevated loss and node churn
-- substantial reduction of acknowledgement traffic with Batch ACK + Gap List
-
-**These are experimental observations, not protocol guarantees.** Real performance depends on topology, traffic, and configuration. Physical validation and calibration are the responsibility of the integrating organization.
-
----
-
-## Target use cases
-
-- Edge and multi-site computing
-- CDN and distributed content delivery
-- Telecommunications and backhaul overlays
-- VPN and secure overlay networks
-- Industrial / IoT infrastructure with unstable links
-- Hybrid cloud and geographically distributed services
-- Any platform that needs multi-hop delivery with faster recovery than pure reactive failover
-
----
-
-## Internet-Drafts (IETF)
-
-Design principles and architecture are documented as Individual Internet-Drafts:
-
-- [draft-kolomytsev-pshmp-core](https://datatracker.ietf.org/doc/draft-kolomytsev-pshmp-core/)
-- [draft-kolomytsev-pshmp-overview](https://datatracker.ietf.org/doc/draft-kolomytsev-pshmp-overview/)
-- `draft-kolomytsev-pshmp-core-overview-00` (submission in progress)
+Security building blocks (transport modes, selected MAC, admission options) exist; **deployment trust, keys, and policy are integrator responsibilities**.
 
 ---
 
 ## Status
 
-**Pilot-ready technology foundation — v3.1**
+**Technology asset / pilot-ready foundation** (Go implementation).
 
-- Core mechanisms implemented in Go
-- Emulation suite (demo / stress / extreme / realistic / live modes)
-- Documentation and IETF drafts
-- Suitable for evaluation, pilot integration, commercial licensing, OEM embedding, or full technology acquisition (including prior versions and design history)
+- Core control + data path implemented and linked as one ecosystem  
+- Emulators and component / ecosystem tests  
+- Public architecture write-up (IETF Individual Internet-Draft)  
+- Suitable for **technical evaluation** and discussion of **licensing / OEM / acquisition**
 
-PSHMP Core is **not** positioned as a finished mass-market product. Integrators are expected to tune thresholds, run physical tests, and adapt the system to their environment.
+Integrators are expected to tune thresholds, wire secrets, and validate on their topology.  
+Lab and emulation results are **experimental observations**, not portable guarantees.
 
 ---
 
-## Commercial options
+## Internet-Draft
 
-- Commercial licensing
-- OEM / product integration
-- Pilot and proof-of-concept deployments
-- Technology acquisition / IP transfer
+Architecture overview (Informational, work in progress — **not** an IETF standard):
 
-Organizations interested in evaluation or partnership are welcome to contact the author.
+- [draft-kolomytsev-pshmp-core-overview-01](https://datatracker.ietf.org/doc/draft-kolomytsev-pshmp-core-overview/)  
+- HTML: https://www.ietf.org/archive/id/draft-kolomytsev-pshmp-core-overview-01.html  
+
+---
+
+## Repository contents (this public mirror)
+
+This public repository is oriented to **evaluation materials**:
+
+- `README.md` — this file  
+- Presentation / one-pager materials (as uploaded)  
+- Links to the public Internet-Draft  
+
+Full source tree, internal tests, and transfer package are provided under a commercial evaluation or acquisition process—not as an open-source mass product dump unless separately agreed.
+
+---
+
+## Commercial posture
+
+- Technology evaluation / pilot  
+- OEM embedding  
+- **Full technology transfer** (preferred discussion frame: buyer control of the asset)  
+- Optional bounded handoff support if agreed  
+
+Not positioned as a mandatory long-term SaaS lock-in from the author.
 
 ---
 
 ## Contact
 
 **Alexander Kolomytsev**  
-Email: [giro.pandemik@gmail.com](mailto:giro.pandemik@gmail.com)
+Email: giro.pandemik@gmail.com
 
 ---
 
-## License
+## License / rights
 
 Copyright © Alexander Kolomytsev. All rights reserved.
 
-Source code and materials are provided for evaluation purposes only unless otherwise agreed under a commercial license or acquisition agreement.
+Materials in this repository are for **evaluation and discussion** unless otherwise agreed in writing (commercial license or acquisition).
+
