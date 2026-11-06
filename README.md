@@ -1,6 +1,7 @@
-<img width="1168" height="784" alt="eXVXX" src="https://github.com/user-attachments/assets/cc26f17e-fdd0-40d4-bcc9-6cf7fb14c5d8" />
+<img width="1672" height="941" alt="Киберсеть PSHMP CORE в горах" src="https://github.com/user-attachments/assets/53b8694c-1576-4484-84ab-e9a0a10d1fad" />
 
-# PSHMP Core v3.1
+
+# PSHMP Core
 
 **Proactive Self-Healing Mesh Protocol**
 
